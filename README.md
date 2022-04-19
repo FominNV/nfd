@@ -12,4 +12,4 @@
 
 Оптимизация изображений - Adobe Photoshop
 
-Deploy [#Carsharing](https://fominnv.github.io/carsharing/)
+Deploy [#NFD](https://fominnv.github.io/carsharing/)
