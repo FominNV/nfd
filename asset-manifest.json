@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/nfd/static/css/main.d19febb5.css",
-    "main.js": "/nfd/static/js/main.dc2c729b.js",
+    "main.js": "/nfd/static/js/main.accbe373.js",
     "static/media/Roboto-Medium.ttf": "/nfd/static/media/Roboto-Medium.7429a63c09f79a1760b0.ttf",
     "static/media/Roboto-Regular.ttf": "/nfd/static/media/Roboto-Regular.a8d6ac03c7b96b7acb62.ttf",
     "static/media/Roboto-Bold.ttf": "/nfd/static/media/Roboto-Bold.75371f53f06181df75f1.ttf",
@@ -27,10 +27,10 @@
     "static/media/circle.svg": "/nfd/static/media/circle.717e28f7f56b5c8420d16f713541c2ee.svg",
     "static/media/triangle.svg": "/nfd/static/media/triangle.ce81e7425fdbcb8e18e8475e250c5da8.svg",
     "main.d19febb5.css.map": "/nfd/static/css/main.d19febb5.css.map",
-    "main.dc2c729b.js.map": "/nfd/static/js/main.dc2c729b.js.map"
+    "main.accbe373.js.map": "/nfd/static/js/main.accbe373.js.map"
   },
   "entrypoints": [
     "static/css/main.d19febb5.css",
-    "static/js/main.dc2c729b.js"
+    "static/js/main.accbe373.js"
   ]
 }
