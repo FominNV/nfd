@@ -1,0 +1,39 @@
+@import "styles/sass/main";
+
+.Ordered {
+  width: 100%;
+  height: 100%;
+
+  &__order-text {
+    margin-bottom: 16px;
+    font: 400 24px/28px $roboto-regular;
+    color: $black;
+  }
+
+  &__model {
+    margin-bottom: 8px;
+    font: 400 18px/21px $roboto-regular;
+    color: $black;
+  }
+
+  &__car-number {
+    width: fit-content;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    font: 400 14px/16px $roboto-regular;
+    color: $black;
+    border: 1px solid $gray;
+    border-radius: 4px;
+  }
+
+  &__item {
+    margin-bottom: 8px;
+    font: 700 14px/16px $roboto-bold;
+    color: $black;
+
+    &_text-light {
+      font: 300 14px/16px $roboto-light;
+      color: $black;
+    }
+  }
+}
