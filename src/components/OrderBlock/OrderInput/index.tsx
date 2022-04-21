@@ -1,9 +1,10 @@
 import {
-  ChangeEvent,
   FC,
+  ChangeEvent,
   FocusEvent,
   KeyboardEvent,
   MouseEvent,
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -29,15 +30,11 @@ const OrderInput: FC<IOrderInputProps> = ({
 }) => {
   const [innerValue, setInnerValue] = useState<string>("")
   const [showDataBlock, setShowDataBlock] = useState<boolean>(false)
-
   const input = useRef<HTMLInputElement | null>(null)
 
-  const onChangeHandler = useCallback<EventFunc<ChangeEvent<HTMLInputElement>>>(
-    (e) => {
-      setInnerValue(e.currentTarget.value)
-    },
-    []
-  )
+  const onChangeHandler = useCallback<EventFunc<ChangeEvent<HTMLInputElement>>>((e) => {
+    setInnerValue(e.currentTarget.value)
+  }, [])
 
   const clearInputValue = useCallback<EventFunc<MouseEvent>>(() => {
     setInnerValue("")
@@ -45,14 +42,11 @@ const OrderInput: FC<IOrderInputProps> = ({
     input.current?.focus()
   }, [setState])
 
-  const onMouseDownHandler = useCallback<
-    EventFunc<MouseEvent<HTMLButtonElement>>
-  >((e) => {
+  const onMouseDownHandler = useCallback<EventFunc<MouseEvent<HTMLButtonElement>>>((e) => {
     if (e.currentTarget.name === "нет совпадений") {
       setShowDataBlock(false)
       return
     }
-
     setInnerValue(e.currentTarget.name)
     setShowDataBlock(false)
   }, [])
@@ -66,9 +60,7 @@ const OrderInput: FC<IOrderInputProps> = ({
     setShowDataBlock(false)
   }, [setState, innerValue])
 
-  const onKeypressHandler = useCallback<
-    EventFunc<KeyboardEvent<HTMLInputElement>>
-  >(
+  const onKeypressHandler = useCallback<EventFunc<KeyboardEvent<HTMLInputElement>>>(
     (e) => {
       if (e.key === "Enter") {
         setState(innerValue)
@@ -78,12 +70,11 @@ const OrderInput: FC<IOrderInputProps> = ({
     [setState, innerValue]
   )
 
-  const dataList = useMemo<JSX.Element[]>(() => {
+  const dataList = useMemo<ReactNode>(() => {
     let resultData = data
 
     if (innerValue) {
-      const filtered = data.filter((elem) =>
-        elem.toLowerCase().includes(innerValue.toLowerCase()))
+      const filtered = data.filter((elem) => elem.toLowerCase().includes(innerValue.toLowerCase()))
       resultData = filtered.length > 0 ? filtered : ["нет совпадений"]
     }
 

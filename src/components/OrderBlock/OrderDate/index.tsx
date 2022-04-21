@@ -1,5 +1,4 @@
 import { ChangeEvent, FC, FocusEvent, MouseEvent, useCallback, useEffect, useState } from "react"
-import { useDispatch } from "react-redux"
 import classNames from "classnames"
 import { format } from 'date-fns'
 
@@ -55,11 +54,9 @@ const OrderDate: FC<IOrderDateProps> = ({ id, label, disabled, defaultValue, set
   const clearButtonClassName = classNames("OrderDate__btn", {
     OrderDate__btn_active: innerValue
   })
-
   const inputClassName = classNames("OrderDate__input", {
     OrderDate__input_filled: innerValue
   })
-
   const placeholderClassName = classNames("OrderDate__input-placeholder", {
     "OrderDate__input-placeholder_active": showPlaceholder
   })

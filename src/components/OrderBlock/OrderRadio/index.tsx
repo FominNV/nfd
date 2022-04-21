@@ -30,8 +30,7 @@ const OrderRadio: FC<IOrderRadioProps> = ({ id, value, name, checked, setState }
         onClick={onClickHandler}
       />
 
-      <div className="OrderRadio__custom"></div>
-
+      <div className="OrderRadio__custom" />
       <p className="OrderRadio__text">{value}</p>
     </label>
   )

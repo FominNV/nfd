@@ -7,3 +7,8 @@ export interface IDataStatusItem {
   key: string
   status: string
 }
+
+export interface IDataPageTitleItem {
+  id: string
+  title: string
+}

@@ -2,7 +2,7 @@ import { FC, ReactNode, useCallback, useEffect, useMemo } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { useTypedSelector } from "store/selectors"
 import { useDispatch } from "react-redux"
-import { setLoading } from "store/common/actions"
+import { setLoading, setPageTitle } from "store/common/actions"
 import {
   getOrder,
   getOrderStatuses,
@@ -17,7 +17,7 @@ import SideBar from "components/SideBarBlock/SideBar"
 import classNames from "classnames"
 import { PATHS } from "routes/consts"
 import { IOrderStatus } from "store/order/types"
-import { dataOrderStatuses, dataOrderSteps } from "./data"
+import { dataOrderStatuses, dataOrderSteps, dataPageTitles } from "./data"
 
 import "./styles.scss"
 
@@ -52,7 +52,7 @@ const Order: FC = () => {
     [ordered?.id, navigate, dispatch]
   )
 
-  const orderSteps = useMemo<JSX.Element[]>(
+  const orderSteps = useMemo<ReactNode>(
     () =>
       dataOrderSteps.map((elem, index) => {
         let blockClassName = classNames("Order__step", {
@@ -118,6 +118,13 @@ const Order: FC = () => {
       setOrderStatuses(status.all)
     }
   }, [status.all, setOrderStatuses])
+
+  useEffect(() => {
+    dataPageTitles.map((elem) => {
+      if (elem.id === params.id) dispatch(setPageTitle(elem.title))
+      if (ordered && ordered.id === params.id) dispatch(setPageTitle("NFD / Ваш заказ"))
+    })
+  }, [params.id, ordered, dispatch])
 
   const popup = useMemo<ReactNode>(() => orderPopup && <PopupOrder />, [orderPopup])
 

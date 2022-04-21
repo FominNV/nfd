@@ -13,7 +13,9 @@ import OrderCarCard from "../../OrderCarCard"
 import "./styles.scss"
 
 const Car: FC = () => {
-  const { car, common, order } = useTypedSelector((state) => state)
+  const { cars, category } = useTypedSelector((state) => state.car)
+  const { car } = useTypedSelector((state) => state.order)
+  const { loading } = useTypedSelector((state) => state.common)
   const [filterCars, setFilterCars] = useState<string>("Все модели")
   const params = useParams()
   const dispatch = useDispatch()
@@ -25,29 +27,29 @@ const Car: FC = () => {
   }, [dispatch])
 
   useEffect(() => {
-    if (!car.cars.all && params.id === "car") {
+    if (!cars.all && params.id === "car") {
       fetchCars()
     }
-  }, [fetchCars, car.cars.all, params.id])
+  }, [fetchCars, cars.all, params.id])
 
   useEffect(() => {
-    if (order.car) {
+    if (car) {
       dispatch(setLockOrderStep("extra", true))
     }
-  }, [dispatch, order.car])
+  }, [dispatch, car])
 
   useEffect(() => {
-    if (order.car && car.cars.all) {
-      car.cars.all.map((elem) => {
-        if (elem.id === order.car?.id) dispatch(setCurrentCar(elem))
+    if (car && cars.all) {
+      cars.all.map((elem) => {
+        if (elem.id === car?.id) dispatch(setCurrentCar(elem))
       })
     }
-  }, [order.car, car.cars.all, dispatch])
+  }, [car, cars.all, dispatch])
 
   const categoryRadios = useMemo<ReactNode>(
     () =>
-      car.category.all &&
-      car.category.all
+      category.all &&
+      category.all
         .reduce((prev, current) => prev.concat(current.name), ["Все модели"])
         .map((elem, index) => (
           <OrderRadio
@@ -59,15 +61,15 @@ const Car: FC = () => {
             setState={setFilterCars}
           />
         )),
-    [car.category.all]
+    [category.all]
   )
 
   const carList = useMemo<ReactNode>(() => {
-    if (car.cars.all) {
+    if (cars.all) {
       const carData =
         filterCars === "Все модели"
-          ? car.cars.all
-          : car.cars.all.filter((elem) => elem.categoryId.name === filterCars)
+          ? cars.all
+          : cars.all.filter((elem) => elem.categoryId.name === filterCars)
 
       return carData.map((elem, index) => (
         <OrderCarCard
@@ -81,9 +83,9 @@ const Car: FC = () => {
       ))
     }
     return null
-  }, [car.cars.all, filterCars])
+  }, [cars.all, filterCars])
 
-  const loading = useMemo<ReactNode>(() => common.loading && <Loading />, [common.loading])
+  const fetching = useMemo<ReactNode>(() => loading && <Loading />, [loading])
 
   return (
     <div className="Car">
@@ -97,7 +99,7 @@ const Car: FC = () => {
 
       <div className="Car__cars">
         {carList}
-        {loading}
+        {fetching}
       </div>
     </div>
   )

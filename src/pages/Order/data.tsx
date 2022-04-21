@@ -4,7 +4,7 @@ import Extra from "components/OrderBlock/Steps/Extra"
 import Total from "components/OrderBlock/Steps/Total"
 import Ordered from "components/OrderBlock/Steps/Ordered"
 import Canceled from "components/OrderBlock/Steps/Canceled"
-import { IDataStatusItem, IOrderStep } from "./types"
+import { IDataPageTitleItem, IDataStatusItem, IOrderStep } from "./types"
 
 export const dataOrderSteps: IOrderStep[] = [
   {
@@ -45,5 +45,32 @@ export const dataOrderStatuses: IDataStatusItem[] = [
   {
     key: "cancel",
     status: "Отмененые"
+  }
+]
+
+export const dataPageTitles: IDataPageTitleItem[] = [
+  {
+    id: "place",
+    title: "NFD / Выбор места"
+  },
+  {
+    id: "car",
+    title: "NFD / Выбор авто"
+  },
+  {
+    id: "extra",
+    title: "NFD / Выбор услуг"
+  },
+  {
+    id: "total",
+    title: "NFD / Итого"
+  },
+  {
+    id: "ordered",
+    title: "NFD / Ваш заказ"
+  },
+  {
+    id: "canceled",
+    title: "NFD / Отмена"
   }
 ]

@@ -1,12 +1,11 @@
-import { FC, useCallback, useMemo } from "react"
-import { YMaps, Map, Placemark, FullscreenControl, PlacemarkGeometry } from "react-yandex-maps"
-
+import { FC, ReactNode, useMemo } from "react"
+import { YMaps, Map, Placemark, FullscreenControl } from "react-yandex-maps"
 import marker from "assets/icons/OrderMap/marker.svg"
 import { IOrderMapProps } from "./types"
 
 const OrderMap: FC<IOrderMapProps> = ({ mapState, dataGeo, setState }) => {
-  const placeMarkers = useMemo<JSX.Element[]>(() => {
-    return dataGeo.map((elem, index) => (
+  const placeMarkers = useMemo<ReactNode>(() =>
+    dataGeo.map((elem, index) => (
       <Placemark
         geometry={elem.coord}
         onClick={() => setState(elem.name)}
@@ -18,8 +17,7 @@ const OrderMap: FC<IOrderMapProps> = ({ mapState, dataGeo, setState }) => {
         }}
         key={`Placemark_${index}`}
       />
-    ))
-  }, [setState, dataGeo])
+    )), [setState, dataGeo])
 
   return (
     <YMaps>

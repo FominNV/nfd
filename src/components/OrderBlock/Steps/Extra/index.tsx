@@ -93,7 +93,6 @@ const Extra: FC = () => {
       dispatch(setOrderExtra(extra))
     }
   }, [
-    order.unlockedStep.extra,
     params.id,
     carColor,
     term,
@@ -101,7 +100,6 @@ const Extra: FC = () => {
     fullTank,
     childChair,
     rightHandDrive,
-    errorDate,
     dispatch
   ])
 

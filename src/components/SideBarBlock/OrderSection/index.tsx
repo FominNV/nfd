@@ -161,7 +161,6 @@ const OrderSection: FC = () => {
       </div>
 
       <p className="SideBarSection__total-price">{orderPrice}</p>
-
       <div className="SideBarSection__btn-wrap">{orderButtons}</div>
     </section>
   )

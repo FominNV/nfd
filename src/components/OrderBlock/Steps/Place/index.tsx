@@ -62,6 +62,14 @@ const Place: FC = () => {
     setCityGeo(geoCities)
   }, [])
 
+  const loadGeo = useCallback<VoidFunc<void>>(async () => {
+    dispatch(setLoading(true))
+    await dispatch(getPoints())
+    const points = location.points as IPoint[]
+    await setCoordinateStates(points)
+    dispatch(setLoading(false))
+  }, [location.points, dispatch, setCoordinateStates])
+
   const setPlaceByStreet = useCallback<VoidFunc<string>>(
     (currentStreet) =>
       location.points?.map((elem) => {
@@ -86,6 +94,12 @@ const Place: FC = () => {
         setMapState({ center: elem.coord, zoom: 17 })
       }
     }), [])
+
+  useEffect(() => {
+    if (!streetGeo && !cityGeo && params.id === "place") {
+      loadGeo()
+    }
+  }, [streetGeo, cityGeo, params.id, loadGeo])
 
   useEffect(() => {
     if (street && streetGeo) {
@@ -125,23 +139,6 @@ const Place: FC = () => {
       dispatch(setLockOrderStep("total", false))
     }
   }, [dispatch, order.place.street])
-
-  useEffect(() => {
-    dispatch(setLoading(true))
-    dispatch(getPoints())
-  }, [dispatch])
-
-  useEffect(() => {
-    if (location.points) {
-      setCoordinateStates(location.points)
-    }
-  }, [location.points, setCoordinateStates])
-
-  useEffect(() => {
-    if (streetGeo && cityGeo && params.id === "place") {
-      dispatch(setLoading(false))
-    }
-  }, [streetGeo, cityGeo, params.id, dispatch])
 
   const cityData = useMemo<string[]>(
     () => (location.points ? location.points.map((elem) => elem.cityId?.name) : []),

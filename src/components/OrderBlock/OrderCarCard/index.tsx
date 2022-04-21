@@ -10,14 +10,14 @@ import { IOrderCarCardProps } from "./types"
 import "./styles.scss"
 
 const OrderCarCard: FC<IOrderCarCardProps> = ({ id, name, priceMin, priceMax, img }) => {
-  const { order } = useTypedSelector((state) => state)
+  const { car } = useTypedSelector((state) => state.order)
   const dispatch = useDispatch()
 
   const setCar = useCallback<EventFunc<MouseEvent>>(() => {
     dispatch(setOrderCar({ id, name, priceMin, priceMax }))
   }, [dispatch, id, name, priceMin, priceMax])
 
-  const cardClassName = classNames('OrderCarCard', { OrderCarCard_active: id === order.car?.id })
+  const cardClassName = classNames("OrderCarCard", { OrderCarCard_active: id === car?.id })
   const price = `${useFormatNumber(priceMin)} - ${useFormatNumber(priceMax)} ₽`
 
   return (
