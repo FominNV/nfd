@@ -4,6 +4,10 @@ const initialState: ICarState = {
   cars: {
     all: null,
     current: null
+  },
+  category: {
+    all: null,
+    current: null
   }
 }
 
@@ -19,6 +23,18 @@ export function carReducer(state: ICarState = initialState, action: CarAction): 
       return {
         ...state,
         cars: { ...state.cars, current: action.payload.current }
+      }
+
+    case CarActionTypes.GET_CATEGORIES:
+      return {
+        ...state,
+        category: { ...state.category, all: action.payload.categories }
+      }
+
+    case CarActionTypes.SET_CURRENT_CATEGORY:
+      return {
+        ...state,
+        category: { ...state.category, current: action.payload.current }
       }
 
     default:

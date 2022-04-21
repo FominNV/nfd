@@ -8,10 +8,7 @@ const initialState: IOrderState = {
   car: null,
   extra: null,
   total: null,
-  date: {
-    from: 0,
-    to: 0
-  },
+  date: null,
   unlockedStep: {
     place: true,
     car: false,
@@ -23,7 +20,9 @@ const initialState: IOrderState = {
   ordered: null,
   status: {
     all: null,
-    current: null
+    new: null,
+    confirm: null,
+    cancel: null
   }
 }
 
@@ -58,7 +57,7 @@ export function orderReducer(state: IOrderState = initialState, action: OrderAct
         ...state,
         unlockedStep: {
           ...state.unlockedStep,
-          [action.payload.step]: action.payload.lock
+          [action.payload.key]: action.payload.lock
         }
       }
 
@@ -78,6 +77,12 @@ export function orderReducer(state: IOrderState = initialState, action: OrderAct
       return {
         ...state,
         order: action.payload.order
+      }
+
+    case OrderActionTypes.SET_ORDERED:
+      return {
+        ...state,
+        ordered: action.payload.ordered
       }
 
     case OrderActionTypes.POST_ORDER:
@@ -101,7 +106,7 @@ export function orderReducer(state: IOrderState = initialState, action: OrderAct
     case OrderActionTypes.SET_ORDER_STATUS:
       return {
         ...state,
-        status: { ...state.status, current: action.payload.status }
+        status: { ...state.status, [action.payload.key]: action.payload.status }
       }
 
     default:

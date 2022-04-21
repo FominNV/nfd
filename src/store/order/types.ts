@@ -4,16 +4,13 @@ export interface IOrderState {
   place: IOrderPlace
   car: Nullable<IOrderCar>
   extra: Nullable<IOrderExtra>
-  date: IOrderDate
+  date: Nullable<IOrderDate>
   total: Nullable<IOrderTotal>
   unlockedStep: IUnlockeOrderStep
   price: Nullable<number>
   order: Nullable<IOrder>
   ordered: Nullable<IOrdered>
-  status: {
-    all: Nullable<IOrderStatus[]>
-    current: Nullable<IOrderStatus>
-  }
+  status: IOrderStatuses
 }
 
 export interface IOrderItem {
@@ -91,8 +88,17 @@ export interface IOrderStatus {
   id: string
 }
 
+export interface IOrderStatuses {
+  [index: string]: Nullable<IOrderStatus[]> | Nullable<IOrderStatus>
+  all: Nullable<IOrderStatus[]>
+  new: Nullable<IOrderStatus>
+  confirm: Nullable<IOrderStatus>
+  cancel: Nullable<IOrderStatus>
+}
+
 export type OrderDispatch<T> = (value: T) => OrderAction
-export type SetLockStepType = (step: keyof IUnlockeOrderStep, lock: boolean) => OrderAction
+export type SetLockStepType = (key: keyof IUnlockeOrderStep, lock: boolean) => OrderAction
+export type SetOrderStatusType = (key: keyof IOrderStatuses, status: IOrderStatus) => OrderAction
 
 export enum OrderActionTypes {
   SET_CITY = "SET_CITY",
@@ -103,6 +109,7 @@ export enum OrderActionTypes {
   SET_ORDER_DATE = "SET_ORDER_DATE",
   SET_ORDER_PRICE = "SET_ORDER_PRICE",
   SET_ORDER = "SET_ORDER",
+  SET_ORDERED = "SET_ORDERED",
   POST_ORDER = "POST_ORDER",
   GET_ORDER = "GET_ORDER",
   GET_ORDER_STATUSES = "GET_ORDER_STATUSES",
@@ -131,12 +138,12 @@ type SetOrderExtraAction = {
 
 type SetLockStepAction = {
   type: OrderActionTypes.SET_LOCK_STEP
-  payload: { step: keyof IUnlockeOrderStep; lock: boolean }
+  payload: { key: keyof IUnlockeOrderStep; lock: boolean }
 }
 
-type SetAvailableDateAction = {
+type SetOrderDateAction = {
   type: OrderActionTypes.SET_ORDER_DATE
-  payload: { date: IOrderDate }
+  payload: { date: Nullable<IOrderDate> }
 }
 
 type SetPriceAction = {
@@ -147,6 +154,11 @@ type SetPriceAction = {
 type SetOrderAction = {
   type: OrderActionTypes.SET_ORDER
   payload: { order: Nullable<IOrder> }
+}
+
+type SetOrderedAction = {
+  type: OrderActionTypes.SET_ORDERED
+  payload: { ordered: Nullable<IOrdered> }
 }
 
 type PostOrderAction = {
@@ -166,7 +178,7 @@ type GetOrderStatusesAction = {
 
 type SetOrderStatusAction = {
   type: OrderActionTypes.SET_ORDER_STATUS
-  payload: { status: IOrderStatus }
+  payload: { key: keyof IOrderStatuses; status: IOrderStatus }
 }
 
 export type OrderAction =
@@ -176,8 +188,9 @@ export type OrderAction =
   | SetLockStepAction
   | SetOrderExtraAction
   | SetPriceAction
-  | SetAvailableDateAction
+  | SetOrderDateAction
   | SetOrderAction
+  | SetOrderedAction
   | PostOrderAction
   | GetOrderAction
   | GetOrderStatusesAction

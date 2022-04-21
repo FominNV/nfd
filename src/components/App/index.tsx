@@ -15,10 +15,6 @@ const App: FC = () => (
       path="/carsharing/order/:id"
       element={<Order />}
     />
-    <Route
-      path="/carsharing/order/ordered/:id"
-      element={<Order />}
-    />
   </Routes>
 )
 

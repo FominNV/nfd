@@ -1,36 +1,62 @@
-import { FC, MouseEvent, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { useTypedSelector } from 'store/selectors'
-import { setLoading } from 'store/common/actions'
-import { postOrder } from 'store/order/actions'
-import { PATHS } from 'routes/consts'
-import { ButtonBgColor, ButtonBorderRadius } from 'components/Button/types'
-import Button from 'components/Button'
-import { ChangeOrderStatusType, IPopupOrderProps } from './types'
+import { FC, MouseEvent, useCallback } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { useTypedSelector } from "store/selectors"
+import { setLoading, showOrderPopup } from "store/common/actions"
+import { postOrder } from "store/order/actions"
+import Button from "components/Button"
+import { PATHS } from "routes/consts"
+import { ButtonBgColor, ButtonBorderRadius } from "components/Button/types"
+import { IOrdered, IOrderStatus } from "store/order/types"
+import { ChangeOrderStatusType } from "./types"
 
-import './styles.scss'
+import "./styles.scss"
 
-const PopupOrder: FC<IPopupOrderProps> = ({ onClick }) => {
+const PopupOrder: FC = () => {
   const { ordered, status } = useTypedSelector((state) => state.order)
+  const { loading } = useTypedSelector((state) => state.common)
   const params = useParams()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const changeOrderStatus = useCallback<ChangeOrderStatusType>((order, currentStatus) => {
-    const fetchOrder = order
-    fetchOrder.orderStatusId = currentStatus
-    dispatch(postOrder(fetchOrder))
+  const changeOrderStatus = useCallback<ChangeOrderStatusType>(
+    async (order, currentStatus, path) => {
+      dispatch(setLoading(true))
+      const fetchOrder = order
+      fetchOrder.orderStatusId = currentStatus
+      await dispatch(postOrder(fetchOrder))
+      dispatch(showOrderPopup(false))
+      navigate(path)
+      dispatch(setLoading(false))
+    },
+    [navigate, dispatch]
+  )
+
+  const confirmOrder = useCallback<EventFunc<MouseEvent>>(() => {
+    const currentOrder = ordered as IOrdered
+    const currentStatus = status.confirm as IOrderStatus
+    const url = PATHS.ORDER + (ordered?.id as string)
+    changeOrderStatus(currentOrder, currentStatus, url)
+  }, [ordered, status.confirm, changeOrderStatus])
+
+  const cancelOrder = useCallback<EventFunc<MouseEvent>>(() => {
+    const currentOrder = ordered as IOrdered
+    const currentStatus = status.cancel as IOrderStatus
+    changeOrderStatus(currentOrder, currentStatus, PATHS.ORDER_CANCELED)
+  }, [ordered, status.cancel, changeOrderStatus])
+
+  const closePopup = useCallback<EventFunc<MouseEvent>>(() => {
+    dispatch(showOrderPopup(false))
   }, [dispatch])
 
-  const onClickHandler = useCallback<EventFunc<MouseEvent>>((e) => {
-    dispatch(setLoading(true))
-    onClick(e)
-    return ordered && status.current && changeOrderStatus(ordered, status.current)
-  }, [ordered, status, dispatch, onClick, changeOrderStatus])
-
-  const confirmName = params.id === "ordered" ? "Отменить" : "Подтвердить"
-  const navigatePath = params.id === "ordered" ? PATHS.ORDER_CANCELED : PATHS.ORDER_ORDERED
-  const popupTitle = params.id === "ordered" ? "Отменить заказ" : "Подтвердить заказ"
+  const buttonName =
+    (ordered && ordered.orderStatusId.name === "Новые" && "Подтвердить") || "Отменить"
+  const popupTitle =
+    (params.id === "total" && "Подтвердить заказ") || "Отменить заказ"
+  const postAction =
+    (ordered && ordered.orderStatusId.name === "Новые" && confirmOrder) ||
+    (ordered && ordered.orderStatusId.name === "Подтвержденные" && cancelOrder) ||
+    undefined
 
   return (
     <div className="PopupOrder">
@@ -40,15 +66,14 @@ const PopupOrder: FC<IPopupOrderProps> = ({ onClick }) => {
       <div className="PopupOrder__content">
         <div className="PopupOrder__title">{popupTitle}</div>
         <div className="PopupOrder__buttons">
-          <div
-            className="PopupOrder__buttons__confirm-cancel"
-          >
+          <div className="PopupOrder__buttons__confirm-cancel">
             <Button
-              name={confirmName}
+              name={buttonName}
               bgColor={ButtonBgColor.GREEN}
               borderRadius={ButtonBorderRadius.SMALL}
-              navigatePath={navigatePath}
-              onClick={onClickHandler}
+              disabled={loading}
+              loading={loading}
+              onClick={postAction}
             />
           </div>
           <div className="PopupOrder__buttons__cancel">
@@ -56,7 +81,7 @@ const PopupOrder: FC<IPopupOrderProps> = ({ onClick }) => {
               name="Вернуться"
               bgColor={ButtonBgColor.BROWN_RED}
               borderRadius={ButtonBorderRadius.SMALL}
-              onClick={onClick}
+              onClick={closePopup}
             />
           </div>
         </div>

@@ -1,9 +1,6 @@
-import { FC, useCallback, useEffect, useMemo } from "react"
-import { useDispatch } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
+import { FC, ReactNode, useMemo } from "react"
+import { useParams } from "react-router-dom"
 import { useTypedSelector } from "store/selectors"
-import { getOrder, setOrder } from "store/order/actions"
-import { setLoading } from "store/common/actions"
 import { format } from "date-fns"
 import Loading from "components/Loading"
 import dataServiceItems from "../Total/data"
@@ -11,59 +8,14 @@ import dataServiceItems from "../Total/data"
 import "./styles.scss"
 
 const Ordered: FC = () => {
-  const { order, common } = useTypedSelector((state) => state)
+  const { ordered } = useTypedSelector((state) => state.order)
+  const { loading } = useTypedSelector((state) => state.common)
   const params = useParams()
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
 
-  const loadOrder = useCallback<VoidFunc<string>>(
-    async (id) => {
-      dispatch(setLoading(true))
-      await dispatch(getOrder(id))
-      dispatch(setLoading(false))
-    },
-    [dispatch]
-  )
-
-  useEffect(() => {
-    if (params.id === "ordered" && localStorage.getItem("nfd_ordered") && !order.ordered) {
-      const id: Nullable<string> = localStorage.getItem("nfd_ordered")
-      if (id) loadOrder(id)
-    }
-  }, [params.id, order.ordered, loadOrder])
-
-  useEffect(() => {
-    if (order.ordered && order.ordered.orderStatusId.name === "Подтвержденные") {
-      localStorage.setItem("nfd_ordered", order.ordered.id)
-      dispatch(setLoading(false))
-    }
-  }, [order.ordered, dispatch])
-
-  // useEffect(() => {
-  //   if (order.ordered && params.id === "ordered") {
-  //     navigate(order.ordered.id)
-  //   }
-  // }, [order.ordered, params.id, navigate])
-
-  useEffect(() => {
-    if (order.ordered && order.ordered.orderStatusId.name === "Отмененые") {
-      localStorage.removeItem("nfd_ordered")
-      dispatch(setLoading(false))
-    }
-  }, [order.ordered, dispatch])
-
-  useEffect(() => {
-    if (params.id === "canceled") {
-      dispatch(setOrder(null))
-    }
-    dispatch(setOrder(null))
-  }, [params.id, dispatch])
-
-  const addServices = useMemo<(
-JSX.Element | false)[]>(
+  const addServices = useMemo<ReactNode>(
     () =>
       dataServiceItems.map((elem) => {
-        if (order.ordered && order.ordered[elem.id]) {
+        if (ordered && ordered[elem.id]) {
           return (
             <div
               className="Ordered__item"
@@ -75,75 +27,63 @@ JSX.Element | false)[]>(
         }
         return false
       }),
-    [order.ordered]
-    )
+    [ordered]
+  )
 
-  const availableFrom = useMemo<JSX.Element | null | false>(
+  const availableDate = useMemo<ReactNode>(
     () =>
-      order.ordered &&
+      ordered &&
       params.id === "ordered" && (
         <div className="Ordered__item">
           Доступна с{" "}
           <span className="Ordered__item_text-light">
-            {format(new Date(order.ordered.createdAt), "dd.MM.yyyy kk:mm")}
+            {format(new Date(ordered.createdAt), "dd.MM.yyyy kk:mm")}
           </span>
         </div>
       ),
-    [order.ordered, params.id]
+    [ordered, params.id]
   )
 
-  const availableTo = useMemo<JSX.Element | null | false>(
+  const carNumber = useMemo<ReactNode>(
     () =>
-      order.ordered &&
-      params.id === "ordered" && (
-        <div className="Ordered__item">
-          Доступна по{" "}
-          <span className="Ordered__item_text-light">
-            {format(new Date(order.ordered.dateTo), "dd.MM.yyyy kk:mm")}
-          </span>
-        </div>
+      ordered?.carId.number && (
+        <div className="Total__car-number">{ordered?.carId.number.replace(/(\d+)/g, " $1 ")}</div>
       ),
-    [order.ordered, params.id]
+    [ordered]
   )
 
-  const carNumber = useMemo<"" | JSX.Element | undefined>(
+  const carImage = useMemo<ReactNode>(
     () =>
-      order.ordered?.carId.number && (
-        <div className="Total__car-number">
-          {order.ordered?.carId.number.replace(/(\d+)/g, " $1 ")}
-        </div>
+      ordered?.carId?.thumbnail.path && (
+        <img
+          src={ordered?.carId?.thumbnail.path}
+          className="Ordered__car__img"
+          alt="car_image"
+        />
       ),
-    [order.ordered]
+    [ordered?.carId?.thumbnail.path]
   )
 
-  const orderText = params.id === "ordered" ? "Ваш заказ подтверждён" : "Ваш заказ отменен"
-
-  const content = useMemo<JSX.Element>(
+  const content = useMemo<ReactNode>(
     () =>
-      (common.loading ? (
+      (loading ? (
         <Loading />
       ) : (
         <>
-          <div className="Ordered__order-text">{orderText}</div>
-          <div className="Total__model">{order.ordered?.carId.name}</div>
+          <div className="Ordered__order-text">Ваш заказ подтверждён</div>
+          <div className="Ordered__car">
+            <div className="Ordered__car__model">{ordered?.carId.name}</div>
+            {carImage}
+          </div>
           {carNumber}
           {addServices}
-          {availableFrom}
-          {availableTo}
+          {availableDate}
         </>
       )),
-    [
-      common.loading,
-      order.ordered?.carId.name,
-      addServices,
-      availableFrom,
-      availableTo,
-      carNumber,
-      orderText
-    ]
+    [loading, carImage, ordered?.carId.name, addServices, availableDate, carNumber]
   )
 
-  return <div className="Total">{content}</div>
+  return <div className="Ordered">{content}</div>
 }
 
 export default Ordered

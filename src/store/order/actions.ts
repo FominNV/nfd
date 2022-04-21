@@ -13,7 +13,8 @@ import {
   OrderAction,
   OrderActionTypes,
   OrderDispatch,
-  SetLockStepType
+  SetLockStepType,
+  SetOrderStatusType
 } from "./types"
 
 export const setPlaceCity: OrderDispatch<Nullable<IOrderItem>> = (city) => {
@@ -44,10 +45,10 @@ export const setOrderExtra: OrderDispatch<Nullable<IOrderExtra>> = (extra) => {
   }
 }
 
-export const setLockOrderStep: SetLockStepType = (step, lock) => {
+export const setLockOrderStep: SetLockStepType = (key, lock) => {
   return {
     type: OrderActionTypes.SET_LOCK_STEP,
-    payload: { step, lock }
+    payload: { key, lock }
   }
 }
 
@@ -58,7 +59,7 @@ export const setOrderPrice: OrderDispatch<Nullable<number>> = (price) => {
   }
 }
 
-export const setOrderDate: OrderDispatch<IOrderDate> = (date) => {
+export const setOrderDate: OrderDispatch<Nullable<IOrderDate>> = (date) => {
   return {
     type: OrderActionTypes.SET_ORDER_DATE,
     payload: { date }
@@ -69,6 +70,13 @@ export const setOrder: OrderDispatch<Nullable<IOrder>> = (order) => {
   return {
     type: OrderActionTypes.SET_ORDER,
     payload: { order }
+  }
+}
+
+export const setOrdered: OrderDispatch<Nullable<IOrdered>> = (ordered) => {
+  return {
+    type: OrderActionTypes.SET_ORDERED,
+    payload: { ordered }
   }
 }
 
@@ -135,9 +143,9 @@ export const getOrderStatuses = () => async (dispatch: Dispatch<OrderAction>) =>
   })
 }
 
-export const setOrderStatus: OrderDispatch<IOrderStatus> = (status) => {
+export const setOrderStatus: SetOrderStatusType = (key, status) => {
   return {
     type: OrderActionTypes.SET_ORDER_STATUS,
-    payload: { status }
+    payload: { key, status }
   }
 }

@@ -10,7 +10,7 @@ import dataBreadcrumbs from "./data"
 import "./styles.scss"
 
 const Breadcrumbs: FC = () => {
-  const { order } = useTypedSelector((state) => state)
+  const { ordered, unlockedStep } = useTypedSelector((state) => state.order)
   const params = useParams()
 
   const links = useMemo<JSX.Element[]>(() => dataBreadcrumbs.map((elem, index) => {
@@ -20,7 +20,7 @@ const Breadcrumbs: FC = () => {
         Breadcrumbs__item_active: params.id === elem.id
       },
       {
-        Breadcrumbs__item_disabled: !order.unlockedStep[elem.id]
+        Breadcrumbs__item_disabled: !unlockedStep[elem.id]
       }
     )
 
@@ -36,17 +36,17 @@ const Breadcrumbs: FC = () => {
         </div>
       </Link>
     )
-  }), [params.id, order])
+  }), [params.id, unlockedStep])
 
   const orderNumber = useMemo<JSX.Element | null>(() => (
-    order.ordered && (
+    ordered && (
     <div className="Breadcrumbs__order-number">
-      Заказ номер {order.ordered.id}
+      Заказ номер {ordered.id}
     </div>
     )
-  ), [order.ordered])
+  ), [ordered])
 
-  const content = params.id === "ordered" ? orderNumber : links
+  const content = (ordered && ordered.id === params.id) ? orderNumber : links
 
   return (
     <div className="Breadcrumbs">

@@ -25,5 +25,6 @@ export interface IButtonProps {
   borderRadius?: ButtonBorderRadius
   disabled?: boolean
   navigatePath?: string
+  loading?: boolean
   onClick?: EventFunc<MouseEvent>
 }

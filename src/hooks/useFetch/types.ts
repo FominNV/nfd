@@ -1,4 +1,4 @@
-import { ICar } from "store/car/types"
+import { ICar, ICategory } from "store/car/types"
 import { IPoint } from "store/location/types"
 import { IOrder, IOrdered, IOrderStatus } from "store/order/types"
 import { IRate } from "store/rate/types"
@@ -12,7 +12,7 @@ export interface IFetchOptions {
 }
 
 export interface IFetchData {
-  data: ICar[] | IPoint[] | IRate[] | IOrderStatus[] | IOrder | IOrdered
+  data: ICar[] | ICategory[] | IPoint[] | IRate[] | IOrderStatus[] | IOrder | IOrdered
 }
 
 export interface IFetchState {
@@ -25,6 +25,7 @@ export type UseFetchType = (url: string, option: IFetchOptions) => Promise<IFetc
 export enum URLS {
   POINT_URL = "https:///api-factory.simbirsoft1.com/api/db/point/",
   CAR_URL = "https:///api-factory.simbirsoft1.com/api/db/car/",
+  CATEGORY_URL = "https:///api-factory.simbirsoft1.com/api/db/category/",
   RATE_URL = "https:///api-factory.simbirsoft1.com/api/db/rate/",
   ORDER_URL = "https:///api-factory.simbirsoft1.com/api/db/order/",
   ORDER_STATUS_URL = "https:///api-factory.simbirsoft1.com/api/db/orderStatus/"

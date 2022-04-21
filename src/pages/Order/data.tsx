@@ -3,9 +3,10 @@ import Car from "components/OrderBlock/Steps/Car"
 import Extra from "components/OrderBlock/Steps/Extra"
 import Total from "components/OrderBlock/Steps/Total"
 import Ordered from "components/OrderBlock/Steps/Ordered"
-import { IOrderStep } from "./types"
+import Canceled from "components/OrderBlock/Steps/Canceled"
+import { IDataStatusItem, IOrderStep } from "./types"
 
-const dataOrderSteps: IOrderStep[] = [
+export const dataOrderSteps: IOrderStep[] = [
   {
     id: "place",
     component: <Place />
@@ -28,8 +29,21 @@ const dataOrderSteps: IOrderStep[] = [
   },
   {
     id: "canceled",
-    component: <Ordered />
+    component: <Canceled />
   }
 ]
 
-export default dataOrderSteps
+export const dataOrderStatuses: IDataStatusItem[] = [
+  {
+    key: "new",
+    status: "Новые"
+  },
+  {
+    key: "confirm",
+    status: "Подтвержденные"
+  },
+  {
+    key: "cancel",
+    status: "Отмененые"
+  }
+]

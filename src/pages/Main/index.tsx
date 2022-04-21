@@ -15,7 +15,7 @@ import "./styles.scss"
 const Main: FC = () => (
   <div className="Main">
     <LandSection>
-      <MainLayout title="NFD">
+      <MainLayout>
         <main className="Main__main">
           <Container>
             <div className="Main__content">

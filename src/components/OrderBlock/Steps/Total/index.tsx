@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo } from "react"
+import { FC, ReactNode, useCallback, useEffect, useMemo } from "react"
 import { useTypedSelector } from "store/selectors"
 import { useDispatch } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -16,42 +16,21 @@ const Total: FC = () => {
   const params = useParams()
   const dispatch = useDispatch()
 
-  const loadOrderStatuses = useCallback(async () => {
-    dispatch(setLoading(true))
-    await dispatch(getOrderStatuses())
-    dispatch(setLoading(false))
-  }, [dispatch])
-
-  useEffect(() => {
-    if (!order.status.all && params.id === "total") {
-      loadOrderStatuses()
-    }
-  }, [order.status.all, params.id, loadOrderStatuses])
-
-  useEffect(() => {
-    if (order.status.all && params.id === "total") {
-      order.status.all.map((elem) => {
-        if (elem.name === "Новые") {
-          dispatch(setOrderStatus(elem))
-        }
-      })
-    }
-  }, [order.status.all, params.id, dispatch])
-
   useEffect(() => {
     if (
-      order.status.current
-      && order.place.city
-      && order.place.street
-      && car.cars.current
-      && order.extra
-      && order.extra.color
-      && order.extra
-      && rate.current
-      && order.price
+      order.status.new &&
+      order.place.city &&
+      order.place.street &&
+      car.cars.current &&
+      order.extra &&
+      order.extra.color &&
+      order.date &&
+      order.extra &&
+      rate.current &&
+      order.price
     ) {
       const dataOrder: IOrder = {
-        orderStatusId: order.status.current,
+        orderStatusId: order.status.new,
         cityId: order.place.city,
         pointId: order.place.street,
         carId: car.cars.current,
@@ -71,8 +50,7 @@ const Total: FC = () => {
     order.status,
     car.cars,
     rate,
-    order.date.from,
-    order.date.to,
+    order.date,
     order.extra,
     order.place.city,
     order.place.street,
@@ -80,14 +58,7 @@ const Total: FC = () => {
     dispatch
   ])
 
-  useEffect(() => {
-    if (params.id === "ordered" && order.ordered) {
-      dispatch(setLoading(false))
-    }
-  }, [params.id, order.ordered, dispatch])
-
-  const addServices = useMemo<(
-    JSX.Element | false)[]>(
+  const addServices = useMemo<ReactNode>(
     () =>
       dataServiceItems.map((elem) => {
         if (order.extra && order.extra[elem.id]) {
@@ -103,11 +74,11 @@ const Total: FC = () => {
         return false
       }),
     [order.extra]
-    )
+  )
 
-  const availableDate = useMemo<"" | JSX.Element | false>(
+  const availableDate = useMemo<ReactNode>(
     () =>
-      order.date.from !== 0 && (
+      order.date && (
         <div className="Total__item">
           Доступна с{" "}
           <span className="Total__item_text-light">
@@ -115,10 +86,10 @@ const Total: FC = () => {
           </span>
         </div>
       ),
-    [order.date.from]
+    [order.date]
   )
 
-  const carNumber = useMemo<"" | JSX.Element | undefined>(
+  const carNumber = useMemo<ReactNode>(
     () =>
       car.cars.current?.number && (
         <div className="Total__car-number">
@@ -128,22 +99,29 @@ const Total: FC = () => {
     [car.cars]
   )
 
-  const content = useMemo<JSX.Element>(
+  const carImage = useMemo<ReactNode>(
     () =>
-      (common.loading ? (
-        <Loading />
-      ) : (
-        <>
-          <div className="Total__model">{car.cars.current?.name}</div>
-          {carNumber}
-          {addServices}
-          {availableDate}
-        </>
-      )),
-    [addServices, availableDate, car.cars, carNumber, common.loading]
+      car.cars.current?.thumbnail.path && (
+        <img
+          src={car.cars.current?.thumbnail.path}
+          className="Total__car__img"
+          alt="car_image"
+        />
+      ),
+    [car.cars]
   )
 
-  return <div className="Total">{content}</div>
+  return (
+    <div className="Total">
+      <div className="Total__car">
+        <div className="Total__car__model">{car.cars.current?.name}</div>
+        {carImage}
+      </div>
+      {carNumber}
+      {addServices}
+      {availableDate}
+    </div>
+  )
 }
 
 export default Total

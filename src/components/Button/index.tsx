@@ -1,5 +1,6 @@
 import React, { FC, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
+import ReactLoading from "react-loading"
 
 import classNames from "classnames"
 import { IButtonProps } from "./types"
@@ -13,16 +14,27 @@ const Button: FC<IButtonProps> = ({
   bgColor,
   disabled,
   navigatePath,
+  loading,
   onClick
 }) => {
   const navigate = useNavigate()
-
   const buttonClassName = classNames("Button", color, borderRadius, bgColor)
 
   const onMouseDownHandler = useCallback<EventFunc<React.MouseEvent>>(() => {
     const path = navigatePath || ""
     navigate(path)
   }, [navigate, navigatePath])
+
+  const fetching = loading && (
+    <div className="Button__loading">
+      <ReactLoading
+        type="spokes"
+        color="gray"
+        height={18}
+        width={18}
+      />
+    </div>
+  )
 
   return (
     <button
@@ -32,7 +44,7 @@ const Button: FC<IButtonProps> = ({
       onMouseDown={onMouseDownHandler}
     >
       <div className="Button__filter" />
-      <div className="Button__name">{name}</div>
+      <div className="Button__name">{fetching || name}</div>
     </button>
   )
 }

@@ -1,9 +1,11 @@
 import { CommonAction, CommonActionTypes, ICommonState } from "./types"
 
 const initialState: ICommonState = {
-  showMenu: false,
+  menuPopup: false,
+  orderPopup: false,
   rusLang: false,
   loading: false,
+  pageTitle: "NFD",
   city: "Екатеринбург"
 }
 
@@ -18,16 +20,28 @@ export function commonReducer(
         rusLang: action.payload.rusLang
       }
 
-    case CommonActionTypes.SET_DISPLAY_MENU:
+    case CommonActionTypes.SHOW_MENU_POPUP:
       return {
         ...state,
-        showMenu: action.payload.showMenu
+        menuPopup: action.payload.menuPopup
+      }
+
+    case CommonActionTypes.SHOW_ORDER_POPUP:
+      return {
+        ...state,
+        orderPopup: action.payload.orderPopup
       }
 
     case CommonActionTypes.SET_LOADING:
       return {
         ...state,
         loading: action.payload.loading
+      }
+
+    case CommonActionTypes.SET_PAGE_TITLE:
+      return {
+        ...state,
+        pageTitle: action.payload.pageTitle
       }
 
     default:

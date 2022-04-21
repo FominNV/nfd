@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react"
+import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { useTypedSelector } from "store/selectors"
@@ -32,23 +32,6 @@ const Place: FC = () => {
   const params = useParams()
   const dispatch = useDispatch()
 
-  const cityData = useMemo<string[]>(() => {
-    return location.points ? location.points.map((elem) => elem.cityId?.name) : []
-  }, [location.points])
-
-  const streetData = useMemo<string[]>(() => {
-    if (location.points) {
-      if (city) {
-        return location.points
-          .filter((elem) => elem.cityId.name === city)
-          .map((elem) => elem.address)
-      }
-
-      return location.points.map((elem) => elem.address)
-    }
-    return []
-  }, [city, location.points])
-
   const setCoordinateStates = useCallback<VoidFunc<IPoint[]>>(async (data) => {
     const geoStreets = await Promise.all(
       data.map(async (elem) => {
@@ -65,7 +48,6 @@ const Place: FC = () => {
         }
       })
     )
-
     setStreetGeo(geoStreets)
 
     const geoCities = await Promise.all(
@@ -77,37 +59,33 @@ const Place: FC = () => {
         }
       })
     )
-
     setCityGeo(geoCities)
   }, [])
 
   const setPlaceByStreet = useCallback<VoidFunc<string>>(
-    (currentStreet) => {
+    (currentStreet) =>
       location.points?.map((elem) => {
         if (elem.address === currentStreet) {
           dispatch(setPlaceCity({ name: elem.cityId.name, id: elem.cityId.id }))
           dispatch(setPlaceStreet({ address: elem.address, id: elem.id }))
         }
-      })
-    },
+      }),
     [dispatch, location.points]
   )
 
-  const showCityOnMap = useCallback<showOnMapType>((town, data) => {
+  const showCityOnMap = useCallback<showOnMapType>((town, data) =>
     data.map((elem) => {
       if (elem.name === town) {
         setMapState({ center: elem.coord, zoom: 10 })
       }
-    })
-  }, [])
+    }), [])
 
-  const showOrderPlaceOnMap = useCallback<showOnMapType>((address, data) => {
+  const showOrderPlaceOnMap = useCallback<showOnMapType>((address, data) =>
     data.map((elem) => {
       if (elem.name === address) {
         setMapState({ center: elem.coord, zoom: 17 })
       }
-    })
-  }, [])
+    }), [])
 
   useEffect(() => {
     if (street && streetGeo) {
@@ -165,7 +143,22 @@ const Place: FC = () => {
     }
   }, [streetGeo, cityGeo, params.id, dispatch])
 
-  const map = useMemo(
+  const cityData = useMemo<string[]>(
+    () => (location.points ? location.points.map((elem) => elem.cityId?.name) : []),
+    [location.points]
+  )
+
+  const streetData = useMemo<string[]>(() => {
+    if (location.points) {
+      const data = !city
+        ? location.points
+        : location.points.filter((elem) => elem.cityId.name === city)
+      return data.map((elem) => elem.address)
+    }
+    return []
+  }, [city, location.points])
+
+  const map = useMemo<ReactNode>(
     () => streetGeo && (
     <OrderMap
       mapState={mapState}
@@ -176,9 +169,11 @@ const Place: FC = () => {
     [streetGeo, mapState]
   )
 
-  const content = useMemo(
+  const content = useMemo<ReactNode>(
     () =>
-      (common.loading ? <Loading /> : (
+      (common.loading ? (
+        <Loading />
+      ) : (
         <>
           <div className="Place__inputs">
             <OrderInput

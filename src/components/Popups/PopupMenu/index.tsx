@@ -27,7 +27,6 @@ const PopupMenu: FC = () => {
   return (
     <div className="PopupMenu">
       <div className="PopupMenu__links">{links}</div>
-
       <div className="PopupMenu__auth">{authLinks}</div>
     </div>
   )

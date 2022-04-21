@@ -1,7 +1,7 @@
 import { FC, MouseEvent, useCallback, useMemo } from "react"
 import { useDispatch } from "react-redux"
 import { useTypedSelector } from "store/selectors"
-import { setLanguage, setDisplayMenu } from "store/common/actions"
+import { setLanguage, showMenuPopup } from "store/common/actions"
 import PopupMenu from "components/Popups/PopupMenu"
 import classNames from "classnames"
 
@@ -14,7 +14,7 @@ import { ReactComponent as Circle } from "assets/icons/NavBar/circle.svg"
 import "./styles.scss"
 
 const NavBar: FC = () => {
-  const { showMenu, rusLang } = useTypedSelector((state) => state.common)
+  const { menuPopup, rusLang } = useTypedSelector((state) => state.common)
   const dispatch = useDispatch()
 
   const toggleLanguage = useCallback<EventFunc<MouseEvent>>(() => {
@@ -22,24 +22,24 @@ const NavBar: FC = () => {
   }, [dispatch, rusLang])
 
   const toggleMenu = useCallback<EventFunc<MouseEvent>>(() => {
-    dispatch(setDisplayMenu(!showMenu))
-  }, [dispatch, showMenu])
+    dispatch(showMenuPopup(!menuPopup))
+  }, [dispatch, menuPopup])
 
-  const menuIcon = useMemo<JSX.Element>(() => (showMenu ? (
+  const menuIcon = useMemo<JSX.Element>(() => (menuPopup ? (
     <Close className="NavBar__menu_icon" />
   ) : (
     <Burger className="NavBar__menu_icon" />
-  )), [showMenu])
+  )), [menuPopup])
 
   const langIcon = useMemo<JSX.Element>(() => (rusLang ? <Rus /> : <Eng />), [rusLang])
-  const popuMenu = useMemo<JSX.Element | false>(() => (showMenu && <PopupMenu />), [showMenu])
+  const popupMenu = useMemo<JSX.Element | false>(() => (menuPopup && <PopupMenu />), [menuPopup])
 
-  const navbarClassName = classNames("NavBar__menu", { NavBar__menu_active: showMenu })
-  const langClassName = classNames("NavBar__lang", { NavBar__lang_active: showMenu })
+  const navbarClassName = classNames("NavBar__menu", { NavBar__menu_active: menuPopup })
+  const langClassName = classNames("NavBar__lang", { NavBar__lang_active: menuPopup })
 
   return (
     <>
-      {popuMenu}
+      {popupMenu}
       <nav className="NavBar">
         <button
           className={navbarClassName}

@@ -9,7 +9,7 @@ import dataSlider from "./data"
 import "./styles.scss"
 
 const Slider: FC = () => {
-  const { showMenu } = useTypedSelector((state) => state.common)
+  const { menuPopup } = useTypedSelector((state) => state.common)
   const [slideIndex, setSlideIndex] = useState<number>(1)
 
   const nextSlide = useCallback<EventFunc<MouseEvent>>(() => {
@@ -40,8 +40,8 @@ const Slider: FC = () => {
   )), [slideIndex])
 
   const popup = useMemo<JSX.Element | false>(() => (
-    showMenu && <div className="Slider__popup" />
-  ), [showMenu])
+    menuPopup && <div className="Slider__popup" />
+  ), [menuPopup])
 
   return (
     <div className="Slider">

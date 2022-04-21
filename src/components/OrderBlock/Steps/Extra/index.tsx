@@ -1,17 +1,17 @@
 import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
 import { useTypedSelector } from "store/selectors"
-import { format, hoursToMilliseconds } from "date-fns"
 import { useDispatch } from "react-redux"
+import { useParams } from "react-router-dom"
+import { getRates, setCurrentRate } from "store/rate/actions"
 import { setOrderDate, setLockOrderStep, setOrderExtra, setOrderPrice } from "store/order/actions"
-import { setCurrentRate } from "store/rate/actions"
-import classNames from "classnames"
-import useTern from "hooks/useTerm"
+import { format, hoursToMilliseconds } from "date-fns"
 import OrderDate from "components/OrderBlock/OrderDate"
 import OrderRadio from "components/OrderBlock/OrderRadio"
 import OrderCheckbox from "components/OrderBlock/OrderCheckbox"
+import classNames from "classnames"
+import useTern from "hooks/useTerm"
 import { dataAddService } from "./data"
-import { CalcOrderPriceType, CheckDatesType } from "./types"
+import { CalcOrderPriceType, CheckDatesType, SetOrderDatesType } from "./types"
 
 import "./styles.scss"
 
@@ -20,36 +20,19 @@ const Extra: FC = () => {
   const [carColor, setCarColor] = useState<string>("")
   const [dateFrom, setDateFrom] = useState<Nullable<string>>(null)
   const [dateTo, setDateTo] = useState<Nullable<string>>(null)
+  const [errorDate, setErrorDate] = useState<Nullable<string>>(null)
   const [tarrif, setTarrif] = useState<string>("")
   const [term, setTerm] = useState<Nullable<string>>(null)
   const [fullTank, setFullTank] = useState<boolean>(false)
   const [childChair, setChildChair] = useState<boolean>(false)
   const [rightHandDrive, setRightHandDrive] = useState<boolean>(false)
-  const [errorDate, setErrorDate] = useState<Nullable<string>>(null)
 
-  const dispatch = useDispatch()
   const params = useParams()
-
-  const colorRadios = useMemo<ReactNode>(
-    () =>
-      car.cars.current &&
-      car.cars.current.colors.map((elem, index) => (
-        <OrderRadio
-          id={`radio_color_${index}`}
-          value={elem}
-          key={`radio_color_${index}`}
-          name="colors"
-          checked={!index}
-          setState={setCarColor}
-        />
-      )),
-    [car.cars]
-  )
+  const dispatch = useDispatch()
 
   const checkDates = useCallback<CheckDatesType>((date1, date2) => {
-    if (!date1 || !date2) {
-      return false
-    }
+    if (!date1 || !date2) return false
+
     const from = new Date(date1).getTime()
     const to = new Date(date2).getTime()
     if (from > to) {
@@ -65,12 +48,24 @@ const Extra: FC = () => {
     return true
   }, [])
 
+  const setOrderDates = useCallback<SetOrderDatesType>(
+    (currentRate, date1, date2) => {
+      const days = Number(currentRate.rateTypeId.unit.replace(/\D+/g, "")) || 1
+      const from = new Date(date1).getTime()
+      const to = date2
+        ? new Date(date2).getTime()
+        : new Date(date1).getTime() + hoursToMilliseconds(24 * days)
+      dispatch(setOrderDate({ from, to }))
+    },
+    [dispatch]
+  )
+
   const calcOrderPrice = useCallback<CalcOrderPriceType>(
-    (currentRate) => {
+    (currentRate, date1 = null, date2 = null) => {
       let price = 0
-      if (currentRate.rateTypeId.name === "Поминутно" && dateFrom && dateTo) {
-        const from = new Date(dateFrom).getTime()
-        const to = new Date(dateTo).getTime()
+      if (checkDates(date1, date2)) {
+        const from = new Date(dateFrom as string).getTime()
+        const to = new Date(dateTo as string).getTime()
         price = Math.ceil((to - from) / 60000) * Number(currentRate.price)
       } else {
         price = currentRate.price
@@ -82,42 +77,11 @@ const Extra: FC = () => {
 
       return price
     },
-    [fullTank, childChair, rightHandDrive, dateFrom, dateTo]
+    [fullTank, childChair, rightHandDrive, dateFrom, dateTo, checkDates]
   )
-
-  const tarrifRadios = useMemo<JSX.Element[] | null>(
-    () =>
-      rate.all &&
-      rate.all.map((elem, index) => {
-        const radioValue = `${elem.rateTypeId.name}, ${elem.price}₽/${elem.rateTypeId.unit}`
-        return (
-          <OrderRadio
-            id={elem.rateTypeId.id}
-            value={radioValue}
-            key={elem.rateTypeId.id}
-            name="tarrif"
-            checked={!index}
-            setState={setTarrif}
-          />
-        )
-      }),
-    [rate.all]
-  )
-
-  const serviceCheckboxes = useMemo<JSX.Element[]>(() => {
-    const setStatesArray = [setFullTank, setChildChair, setRightHandDrive]
-    return dataAddService.map((elem, index) => (
-      <OrderCheckbox
-        id={`checkbox_${elem.id}_${index}`}
-        label={elem.label}
-        key={`checkbox_service_${index}`}
-        setState={setStatesArray[index]}
-      />
-    ))
-  }, [])
 
   useEffect(() => {
-    if (order.unlockedStep.extra && params.id === "extra") {
+    if (params.id === "extra") {
       const extra = {
         color: carColor,
         term,
@@ -150,32 +114,28 @@ const Extra: FC = () => {
   }, [order.extra, dispatch])
 
   useEffect(() => {
-    if (params.id === "extra" && rate.current) {
+    if (params.id === "extra" && rate.current && rate.current?.rateTypeId.name !== "Поминутно") {
       dispatch(setOrderPrice(calcOrderPrice(rate.current)))
+    } else if (rate.current?.rateTypeId.name === "Поминутно" && checkDates(dateFrom, dateTo)) {
+      dispatch(setOrderPrice(calcOrderPrice(rate.current, dateFrom, dateTo)))
     } else if (rate.current?.rateTypeId.name === "Поминутно" && !checkDates(dateFrom, dateTo)) {
       dispatch(setOrderPrice(null))
     }
-  }, [dateFrom, dateTo, params.id, tarrif, rate, dispatch, checkDates, calcOrderPrice])
+  }, [dateFrom, dateTo, params.id, rate, dispatch, checkDates, calcOrderPrice])
 
   useEffect(() => {
     if (rate.current && rate.current.rateTypeId.name !== "Поминутно" && dateFrom) {
-      const from = new Date(dateFrom).getTime()
-      let days = Number(rate.current.rateTypeId.unit.replace(/\D+/g, ""))
-      days = !days ? 1 : days
-      const to = new Date(dateFrom).getTime() + hoursToMilliseconds(24 * days)
-      dispatch(setOrderDate({ from, to }))
+      setOrderDates(rate.current, dateFrom)
     } else if (
       rate.current &&
       rate.current.rateTypeId.name === "Поминутно" &&
-      dateFrom &&
-      dateTo &&
       checkDates(dateFrom, dateTo)
     ) {
-      const from = new Date(dateFrom).getTime()
-      const to = new Date(dateTo).getTime()
-      dispatch(setOrderDate({ from, to }))
+      setOrderDates(rate.current, dateFrom as string, dateTo as string)
+    } else {
+      dispatch(setOrderDate(null))
     }
-  }, [dateFrom, errorDate, dateTo, rate, checkDates, dispatch])
+  }, [dateFrom, dateTo, rate, errorDate, setOrderDates, checkDates, dispatch])
 
   useEffect(() => {
     if (tarrif && rate.all) {
@@ -188,34 +148,74 @@ const Extra: FC = () => {
   }, [tarrif, rate.all, dispatch])
 
   useEffect(() => {
-    if (
-      rate.current &&
-      rate.current.rateTypeId.name === "Поминутно" &&
-      checkDates(dateFrom, dateTo)
-    ) {
-      setTerm(useTern(dateFrom as string, dateTo as string))
-    } else if (
-      rate.current &&
-      rate.current.rateTypeId.name === "Поминутно" &&
-      !checkDates(dateFrom, dateTo)
-    ) {
+    if (order.date) {
+      setTerm(useTern(order.date.from, order.date.to))
+    } else {
       setTerm(null)
-    } else if (
-      rate.current &&
-      rate.current.rateTypeId.name !== "Поминутно"
-    ) {
-      setTerm(rate.current.rateTypeId.unit)
     }
-  }, [dateFrom, dateTo, rate, checkDates])
+  }, [order.date])
+
+  useEffect(() => {
+    dispatch(getRates())
+  }, [dispatch])
+
+  const colorRadios = useMemo<ReactNode>(
+    () =>
+      car.cars.current &&
+      car.cars.current.colors.map((elem, index) => (
+        <OrderRadio
+          id={`radio_color_${index}`}
+          value={elem}
+          key={`radio_color_${index}`}
+          name="colors"
+          checked={!index}
+          setState={setCarColor}
+        />
+      )),
+    [car.cars]
+  )
+
+  const tarrifRadios = useMemo<ReactNode>(
+    () =>
+      rate.all &&
+      rate.all.map((elem, index) => {
+        const radioValue = `${elem.rateTypeId.name}, ${elem.price}₽/${elem.rateTypeId.unit}`
+        return (
+          <OrderRadio
+            id={elem.rateTypeId.id}
+            value={radioValue}
+            key={elem.rateTypeId.id}
+            name="tarrif"
+            checked={!index}
+            setState={setTarrif}
+          />
+        )
+      }),
+    [rate.all]
+  )
+
+  const serviceCheckboxes = useMemo<ReactNode>(() => {
+    const setStatesArray = [setFullTank, setChildChair, setRightHandDrive]
+    return dataAddService.map((elem, index) => (
+      <OrderCheckbox
+        id={`checkbox_${elem.id}_${index}`}
+        label={elem.label}
+        key={`checkbox_service_${index}`}
+        setState={setStatesArray[index]}
+      />
+    ))
+  }, [])
 
   const errorDateClassName = classNames("Extra__date-error", {
-    "Extra__date-error_active": errorDate
+    "Extra__date-error_active":
+      errorDate && rate.current && rate.current.rateTypeId.name === "Поминутно"
   })
   const dateBlockClassName = classNames("Extra__date-block", {
-    "Extra__date-block_error": errorDate
+    "Extra__date-block_error":
+      errorDate && rate.current && rate.current.rateTypeId.name === "Поминутно"
   })
 
-  const disableInputDate = tarrif.split(",")[0] !== "Поминутно"
+  const disableInputDate = Boolean(rate.current && rate.current.rateTypeId.name !== "Поминутно")
   const defaultDateFrom = format(Date.now(), "yyyy-MM-dd'T'kk:mm")
 
   return (
